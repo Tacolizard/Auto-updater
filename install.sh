@@ -1,5 +1,38 @@
 #!/bin/bash
 
+mgr='yaourt'
+
+depget() {
+	echo "::Checking dependencies."
+    if hash yaourt 2>/dev/null; then
+        echo "command yaourt found."
+    else
+        echo "Yaourt not found. I won't be able to access the AUR without it."
+		echo "::Install yaourt? (Y/N)"
+		select yn in "Yes" "No"; do
+			case $yn in
+		    		Yes ) echo "Installing..."; echo "TODO"; break;;
+		    		No ) echo "Falling back to pacman."; mgr='pacman'; break;;
+			esac
+		done
+    fi
+    if hash crontab 2>/dev/null; then
+    	echo "command crontab found."
+    else
+    	echo "Crontab not found; Installing..."
+    	$mgr -S cronie
+    fi
+    if hash wget 2>/dev/null; then
+    	echo "command wget found."
+    else
+    	echo "wget not found; Installing..."
+    	$mgr -S wget
+    fi
+
+}
+
+depget
+
 if [ ! -d ./src ]; then
 	echo "::Install script must be run from the updateutil folder."
 	echo "Please cd to the folder."; exit 1;
